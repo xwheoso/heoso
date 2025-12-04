@@ -1,18 +1,43 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="antialiased">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZIP-TOOL</title>
+    <title>ZIP Studio - 极简、安全、本地化</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <script>
         tailwind.config = {
             theme: {
                 extend: {
+                    fontFamily: {
+                        sans: ['-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+                    },
                     colors: {
-                        primary: '#4F46E5', // 靛蓝色
-                        secondary: '#10B981', // 翠绿色
+                        apple: {
+                            bg: '#fbfbfd', // Apple 官网常见的浅灰背景
+                            card: '#ffffff',
+                            text: '#1d1d1f', // 深灰文本，非纯黑
+                            subtext: '#86868b', // 次级文本
+                            blue: '#0071e3', // Apple 交互蓝
+                            blueHover: '#0077ED',
+                        }
+                    },
+                    boxShadow: {
+                        // 极致柔和的 Apple 风格悬浮阴影
+                        'apple-card': '0 20px 40px -15px rgba(0,0,0,0.05), 0 0 20px -5px rgba(0,0,0,0.02)',
+                        'apple-hover': '0 30px 60px -15px rgba(0,0,0,0.1), 0 0 30px -5px rgba(0,0,0,0.04)',
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: 0, transform: 'translateY(20px)' },
+                            '100%': { opacity: 1, transform: 'translateY(0)' },
+                        }
                     }
                 }
             }
@@ -20,79 +45,91 @@
     </script>
     <style type="text/tailwindcss">
         @layer utilities {
-            /* 美化文件上传输入框的样式 */
-            .custom-file-upload {
-                @apply border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-primary transition duration-300 ease-in-out bg-gray-50 hover:bg-indigo-50;
+            /* 美化的上传区域基础样式 */
+            .upload-zone-base {
+                @apply relative h-48 rounded-[24px] bg-gray-50 border border-transparent transition-all duration-300 ease-out group-hover:bg-[#f5f5f7] group-hover:border-gray-200 overflow-hidden;
+            }
+            /* 交互按钮基础样式 */
+            .apple-button {
+                @apply w-full py-4 rounded-full bg-apple-blue text-white font-medium text-[17px] transition-all duration-300 ease-out hover:bg-apple-blueHover hover:shadow-lg hover:scale-[1.01] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed;
             }
         }
+        /* 全局背景色 */
+        body { background-color: #fbfbfd; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-100 to-slate-200 min-h-screen py-12 font-sans text-gray-800">
+<body class="min-h-screen py-20 px-4 font-sans text-apple-text selection:bg-apple-blue/20">
 
-<div class="container mx-auto px-4 max-w-5xl">
-    <div class="text-center mb-12">
-        <h1 class="text-4xl font-extrabold text-gray-900 mb-4">
-            <i class="fa-solid fa-file-zipper text-primary mr-2"></i> 极简 ZIP 工具箱
+<div class="container mx-auto max-w-6xl">
+    
+    <div class="text-center mb-20 animate-fade-in-up">
+        <h1 class="text-5xl md:text-6xl font-semibold tracking-tight mb-4 bg-clip-text text-transparent bg-gradient-to-b from-apple-text to-gray-600">
+            ZIP Studio
         </h1>
-        <p class="text-lg text-gray-600 max-w-2xl mx-auto bg-white/50 py-2 px-4 rounded-full inline-block shadow-sm">
-            <i class="fa-solid fa-shield-halved text-green-600 mr-1"></i> 
-            安全声明:所有文件处理均在您的浏览器本地完成，<b>绝不会</b>上传至任何服务器
-        </p>
+        <!-- <p class="text-xl text-apple-subtext max-w-2xl mx-auto leading-relaxed font-light">
+            极简设计，极致安全。所有文件操作均在您的浏览器本地完成，无需上传。
+        </p> -->
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 px-4 md:px-0">
 
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-shadow duration-300">
-            <div class="bg-primary p-6">
-                <h2 class="text-2xl font-bold text-white flex items-center">
-                    <i class="fa-solid fa-box-archive mr-3"></i> 创建 ZIP 压缩包
-                </h2>
-                <p class="text-indigo-100 mt-2 text-sm">选择多个文件，打包成一个 ZIP 文件下载。</p>
-            </div>
-            <div class="p-8 space-y-6">
-                <div>
-                    <label for="filesToZip" class="block text-sm font-medium text-gray-700 mb-2">第一步：选择文件</label>
-                    <label class="custom-file-upload flex flex-col items-center justify-center">
-                        <i class="fa-solid fa-cloud-arrow-up text-4xl text-gray-400 mb-3"></i>
-                        <span class="text-sm text-gray-600 font-medium">点击此处选择文件</span>
-                        <span id="zipFileCount" class="text-xs text-gray-400 mt-1">(支持多选)</span>
-                        <input id="filesToZip" type="file" multiple class="hidden" />
-                    </label>
+        <div class="group bg-apple-card rounded-[32px] p-8 md:p-10 shadow-apple-card transition-all duration-500 hover:shadow-apple-hover hover:-translate-y-1 animate-fade-in-up" style="animation-delay: 0.1s;">
+            <div class="mb-8">
+                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-apple-blue flex items-center justify-center text-2xl mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[-5deg]">
+                    <i class="fa-solid fa-box-archive"></i>
                 </div>
+                <h2 class="text-3xl font-semibold mb-2">创建压缩包</h2>
+                <p class="text-apple-subtext">选择多个文件，打包下载。</p>
+            </div>
+
+            <div class="space-y-8">
+                <label class="upload-zone-base flex flex-col items-center justify-center cursor-pointer group/upload">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-blue-50/50 to-transparent opacity-0 group-hover/upload:opacity-100 transition-opacity duration-500"></div>
+                    
+                    <div class="relative z-10 flex flex-col items-center transition-transform duration-300 group-hover/upload:-translate-y-1">
+                        <i class="fa-solid fa-cloud-arrow-up text-5xl text-gray-300 mb-4 transition-colors duration-300 group-hover/upload:text-apple-blue animate-pulse-slow"></i>
+                        <span class="text-lg font-medium text-gray-600 group-hover/upload:text-apple-text">点击选择文件</span>
+                        <span id="zipFileCount" class="text-sm text-apple-subtext mt-2 transition-all">(支持多选)</span>
+                    </div>
+                    <input id="filesToZip" type="file" multiple class="hidden" />
+                </label>
                 
-                <button onclick="compressFiles()" class="w-full flex items-center justify-center py-3 px-6 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-gradient-to-r from-primary to-indigo-600 hover:from-indigo-600 hover:to-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 active:scale-[0.98]">
-                    <i class="fa-solid fa-download mr-2"></i> 开始压缩并下载
+                <button onclick="compressFiles()" id="compressBtn" class="apple-button">
+                    生成并下载 ZIP
                 </button>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-xl overflow-hidden hover:shadow-2xl transition-shadow duration-300">
-             <div class="bg-secondary p-6">
-                <h2 class="text-2xl font-bold text-white flex items-center">
-                    <i class="fa-solid fa-box-open mr-3"></i> 解压 ZIP 文件
-                </h2>
-                <p class="text-green-100 mt-2 text-sm">读取 ZIP 文件内容并单独下载内部文件。</p>
-            </div>
-            <div class="p-8 space-y-6">
-                <div>
-                    <label for="fileToUnzip" class="block text-sm font-medium text-gray-700 mb-2">第一步：选择 ZIP 文件</label>
-                     <label class="custom-file-upload flex flex-col items-center justify-center relative">
-                        <i class="fa-solid fa-file-zipper text-4xl text-gray-400 mb-3"></i>
-                        <span class="text-sm text-gray-600 font-medium">点击选择 .zip 文件</span>
-                        <span id="unzipFileName" class="text-xs text-gray-400 mt-1 truncate max-w-[250px]">(仅限一个文件)</span>
-                        <input id="fileToUnzip" type="file" accept=".zip" class="hidden" />
-                    </label>
+        <div class="group bg-apple-card rounded-[32px] p-8 md:p-10 shadow-apple-card transition-all duration-500 hover:shadow-apple-hover hover:-translate-y-1 animate-fade-in-up" style="animation-delay: 0.2s;">
+             <div class="mb-8">
+                <div class="w-12 h-12 rounded-2xl bg-green-50 text-emerald-500 flex items-center justify-center text-2xl mb-6 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-[5deg]">
+                    <i class="fa-solid fa-box-open"></i>
                 </div>
+                <h2 class="text-3xl font-semibold mb-2">解压文件</h2>
+                <p class="text-apple-subtext">读取 ZIP 内容并提取文件。</p>
+            </div>
 
-                <button onclick="decompressFile()" class="w-full flex items-center justify-center py-3 px-6 border border-transparent rounded-lg shadow-sm text-lg font-medium text-white bg-gradient-to-r from-secondary to-emerald-600 hover:from-emerald-600 hover:to-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary transition-all duration-200 active:scale-[0.98]">
-                     <i class="fa-solid fa-magnifying-glass mr-2"></i> 读取文件列表
+            <div class="space-y-8">
+                <label class="upload-zone-base flex flex-col items-center justify-center cursor-pointer group/upload">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-green-50/50 to-transparent opacity-0 group-hover/upload:opacity-100 transition-opacity duration-500"></div>
+
+                    <div class="relative z-10 flex flex-col items-center transition-transform duration-300 group-hover/upload:-translate-y-1">
+                        <i class="fa-solid fa-file-zipper text-5xl text-gray-300 mb-4 transition-colors duration-300 group-hover/upload:text-emerald-500 animate-pulse-slow"></i>
+                        <span class="text-lg font-medium text-gray-600 group-hover/upload:text-apple-text">点击选择 .zip 文件</span>
+                        <span id="unzipFileName" class="text-sm text-apple-subtext mt-2 truncate max-w-[200px] transition-all">(仅限一个文件)</span>
+                    </div>
+                    <input id="fileToUnzip" type="file" accept=".zip" class="hidden" />
+                </label>
+
+                <button onclick="decompressFile()" id="decompressBtn" class="apple-button bg-emerald-500 hover:bg-emerald-600">
+                     读取文件列表
                 </button>
 
-                <div id="unzipResultWrapper" class="hidden mt-6">
-                    <h3 class="text-sm font-bold text-gray-700 mb-3 flex items-center">
-                        <i class="fa-solid fa-list-ul mr-2"></i> 文件列表：
+                <div id="unzipResultWrapper" class="hidden transition-all duration-500 ease-in-out">
+                    <h3 class="text-sm font-semibold text-apple-subtext mb-4 uppercase tracking-wider pl-2">
+                        文件列表
                     </h3>
-                    <div id="unzipResult" class="border rounded-lg bg-gray-50 max-h-64 overflow-y-auto p-2 divide-y divide-gray-200 shadow-inner">
+                    <div id="unzipResult" class="bg-gray-50/80 rounded-3xl p-2 max-h-80 overflow-y-auto shadow-inner backdrop-blur-sm">
                         </div>
                 </div>
             </div>
@@ -100,12 +137,11 @@
 
     </div>
     
-    <div class="text-center text-gray-500 text-sm mt-12 pb-8">
-        <p class="mb-2">Designed for simplicity and privacy.</p>
-        
-        <a href="mailto:xwheoso@gmail.com" class="inline-flex items-center hover:text-primary transition duration-200">
-            <i class="fa-regular fa-envelope mr-2"></i>
-            反馈与联系
+    <div class="text-center text-apple-subtext text-sm mt-24 mb-12 animate-fade-in-up" style="animation-delay: 0.3s;">
+        <p class="mb-4 font-light">Designed for simplicity and privacy.</p>
+        <a href="mailto:xwheoso@gmail.com" class="inline-flex items-center py-2 px-4 rounded-full bg-white shadow-sm hover:shadow-md text-apple-text transition-all duration-300 hover:scale-105 hover:text-apple-blue group">
+            <i class="fa-regular fa-envelope mr-2 text-gray-400 group-hover:text-apple-blue transition-colors"></i>
+            <span class="font-medium">联系开发者</span>
         </a>
     </div>
 </div>
@@ -115,42 +151,51 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
 
 <script>
-    // --- 界面交互逻辑 (新增) ---
-    // 监听压缩文件选择，更新提示文本
+    // --- 界面交互逻辑 (增强版) ---
     document.getElementById('filesToZip').addEventListener('change', function(e) {
         const count = e.target.files.length;
         const label = document.getElementById('zipFileCount');
-        label.textContent = count > 0 ? `已选择 ${count} 个文件` : '(支持多选)';
-        label.classList.toggle('text-primary', count > 0);
+        if (count > 0) {
+            label.textContent = `已准备 ${count} 个文件`;
+            label.classList.add('text-apple-blue', 'font-medium');
+        } else {
+            label.textContent = '(支持多选)';
+            label.classList.remove('text-apple-blue', 'font-medium');
+        }
     });
 
-    // 监听解压文件选择，更新提示文本
     document.getElementById('fileToUnzip').addEventListener('change', function(e) {
         const fileName = e.target.files[0]?.name;
         const label = document.getElementById('unzipFileName');
-        label.textContent = fileName ? fileName : '(仅限一个文件)';
-        label.classList.toggle('text-secondary', fileName);
-        // 如果重新选择了文件，隐藏之前的结果列表
+        if (fileName) {
+            label.textContent = fileName;
+            label.classList.add('text-emerald-600', 'font-medium');
+        } else {
+            label.textContent = '(仅限一个文件)';
+            label.classList.remove('text-emerald-600', 'font-medium');
+        }
         document.getElementById('unzipResultWrapper').classList.add('hidden');
     });
 
 
-    // --- 核心逻辑 (功能未变，仅适配了新的ID和样式) ---
+    // --- 核心逻辑 (逻辑不变，更新了UI反馈和生成的HTML结构) ---
 
-    // 压缩逻辑
     async function compressFiles() {
         const fileInput = document.getElementById('filesToZip');
         const files = fileInput.files;
+        const btn = document.getElementById('compressBtn');
 
         if (files.length === 0) {
-            // 使用更现代的弹窗可以用 SweetAlert2，这里为了简单仍用 alert，但你可以自己替换
-            alert("⚠️ 请先选择要压缩的文件！");
+            // 简单的抖动提示 (这里简化处理，实际可以用 CSS动画)
+            btn.classList.add('bg-red-500');
+            setTimeout(() => btn.classList.remove('bg-red-500'), 200);
+            alert("请先选择需要压缩的文件。");
             return;
         }
 
-        const btn = event.currentTarget;
         const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> 处理中...';
+        // 苹果风格的加载提示
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> 正在打包...';
         btn.disabled = true;
 
         const zip = new JSZip();
@@ -160,71 +205,84 @@
 
         try {
             const content = await zip.generateAsync({type: "blob"});
-            saveAs(content, `archive_${new Date().getTime()}.zip`); // 加上时间戳让文件名不重复
+            saveAs(content, `Archive.zip`);
         } catch (e) {
             console.error(e);
-            alert("❌ 压缩失败，请重试。");
+            alert("压缩失败，请重试。");
         } finally {
             btn.innerHTML = originalText;
             btn.disabled = false;
         }
     }
 
-    // 解压逻辑
     async function decompressFile() {
         const fileInput = document.getElementById('fileToUnzip');
         const file = fileInput.files[0];
         const resultWrapper = document.getElementById('unzipResultWrapper');
         const resultDiv = document.getElementById('unzipResult');
+        const btn = document.getElementById('decompressBtn');
+        
         resultDiv.innerHTML = "";
 
         if (!file) {
-            alert("⚠️ 请先选择一个 ZIP 文件！");
+            btn.classList.add('bg-red-500');
+            setTimeout(() => btn.classList.remove('bg-red-500'), 200);
+            alert("请先选择一个 ZIP 文件。");
             return;
         }
         
-        const btn = event.currentTarget;
         const originalText = btn.innerHTML;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> 读取中...';
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> 正在解析...';
         btn.disabled = true;
 
         try {
             const zip = new JSZip();
             const zipContent = await zip.loadAsync(file);
             
-            let listHtml = '<ul class="w-full">';
+            // 使用 flex 布局的列表，更像是一个个小卡片
+            let listHtml = '<div class="flex flex-col gap-2 p-2">';
             let fileCount = 0;
 
             zipContent.forEach(function (relativePath, zipEntry) {
                 if (!zipEntry.dir) {
                     fileCount++;
-                    // 注意这里：我更新了生成列表的 HTML，使用了 Tailwind 类名来美化
+                    // 重新设计的文件列表项：圆角、白色背景、微阴影、悬停放大
                     listHtml += `
-                        <li class="flex justify-between items-center py-3 px-3 hover:bg-gray-100 transition duration-150">
-                            <div class="flex items-center overflow-hidden">
-                                <i class="fa-regular fa-file text-gray-400 mr-3"></i>
-                                <span class="text-sm text-gray-700 truncate" title="${zipEntry.name}">${zipEntry.name}</span>
+                        <div class="group/item flex justify-between items-center p-4 bg-white rounded-[20px] shadow-sm border border-gray-100/50 transition-all duration-200 hover:shadow-md hover:scale-[1.01] hover:border-blue-100">
+                            <div class="flex items-center overflow-hidden mr-4">
+                                <div class="w-10 h-10 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mr-4 group-hover/item:bg-blue-50 group-hover/item:text-apple-blue transition-colors">
+                                    <i class="fa-regular fa-file text-lg"></i>
+                                </div>
+                                <span class="text-[15px] font-medium text-apple-text truncate" title="${zipEntry.name}">${zipEntry.name}</span>
                             </div>
-                            <button class="text-sm text-secondary hover:text-emerald-700 font-medium py-1 px-3 border border-secondary rounded hover:bg-green-50 transition ml-2 shrink-0" 
+                            <button class="opacity-0 group-hover/item:opacity-100 transition-all duration-200 focus:opacity-100 text-sm font-medium text-apple-blue bg-blue-50 hover:bg-apple-blue hover:text-white py-2 px-5 rounded-full shrink-0" 
                                 onclick="downloadOneFile('${relativePath.replace(/'/g, "\\'")}')">
-                                <i class="fa-solid fa-download"></i> 下载
+                                下载
                             </button>
-                        </li>`;
+                        </div>`;
                 }
             });
-            listHtml += '</ul>';
+            listHtml += '</div>';
 
             if (fileCount === 0) {
-                 resultDiv.innerHTML = '<p class="text-center text-gray-500 py-4">压缩包里似乎没有文件。</p>';
+                 resultDiv.innerHTML = '<div class="text-center text-apple-subtext py-8">压缩包是空的或只包含文件夹。</div>';
             } else {
                  resultDiv.innerHTML = listHtml;
             }
-            resultWrapper.classList.remove('hidden'); // 显示结果区域
+            resultWrapper.classList.remove('hidden'); 
+            // 简单的入场动画
+            resultWrapper.style.opacity = 0;
+            resultWrapper.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                resultWrapper.style.opacity = 1;
+                resultWrapper.style.transform = 'translateY(0)';
+            }, 50);
+
             window.currentZip = zip;
 
         } catch (e) {
             console.error(e);
-            alert("❌ 这不是一个有效的 ZIP 文件或文件已损坏。");
+            alert("无法解析文件，请确保选择的是有效的 ZIP 格式。");
             resultWrapper.classList.add('hidden');
         } finally {
              btn.innerHTML = originalText;
@@ -237,7 +295,6 @@
         const file = window.currentZip.file(filename);
         if(file) {
             const blob = await file.async("blob");
-            // 处理可能包含路径的文件名，只取最后一部分
             const safeFileName = filename.split('/').pop();
             saveAs(blob, safeFileName);
         }
